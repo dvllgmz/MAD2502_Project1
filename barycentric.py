@@ -1,4 +1,96 @@
+from matplotlib.patches import Polygon
+import matplotlib.pyplot as plt
 import numpy as np
+
+"""
+MAKE SURE YOU ADD MATPLOTLIB TO YOUR INTERPETERS 
+TOP RIGHT GEAR -> PROJECT -> PROJECT INTERPERTER
+
+"""
+def get_barycentric_coordinates(triangle_coordinates, point_coordinates):
+
+    #setting up triangle and "goal" coordinates.
+    x1 = triangle_coordinates[0,0]
+    y1 = triangle_coordinates[1,0]
+    x2 = triangle_coordinates[0,1]
+    y2 = triangle_coordinates[1,1]
+    x3 = triangle_coordinates[0,2]
+    y3 = triangle_coordinates[1,2]
+    x_goal = point_coordinates[0]
+    y_goal = point_coordinates[1]
+
+    #our equations begin looking like this
+    #r1*x1+r2*x2+r3*x3 == x_goal
+    #r1*y1+r2*y2+r3*y3 == y_goal
+    #r1+r2+r3 = 1
+    """
+    goal:
+    - eliminate variables until we have 1 left that we can solve for.
+    - then, plug in the rest until everything is complete"""
+    #get rid of one variable via subsitution (r1 = 1- r2 -r3). Remeber this for when we solve for r1 after we solve for r2 and r3.
+    #so now it looks like
+    #(1-r2-r3)*x1+r2*x2+r3*x3 == x_goal
+    #(1-r2-r3)*y1+r2*y2+r3*y3 == y_goal
+    #distribute
+    #x1 -  r2*x1 - r3*x1 + r2*x2 +r3*x3 == x_goal
+    #y1 - r2*y1 - r3*y1 + r2*y2 +  r3*y3 == y_goal
+    #group for readability
+    #(x2-x1)*r2+(x3-x1)*r3 == x_goal - x1
+    #(y2 - y1) * r2 + (y3 - y1) * r3 == y_goal - y1
+    #for better readability, lets have x2-x1 be a1, x3-x1 be b1, and x_goal - x1 be c1.
+    #same with the y variables, with a2,b2, and c2. (save these equations after we solve for this first variable)
+    a1 = x2 - x1
+    b1 = x3 - x1
+    c1 = x_goal - x1
+    a2 = y2 - y1
+    b2 = y3 - y1
+    c2 = y_goal - y1
+    #a1 * r2 + b1 * r3 = c1
+    #a2 * r2 + b2 * r3 = c2
+    #we can eliminate a second unknown by either:
+    #multiplying the first equation by a2 and the second equation by a1
+    #or multiplying the first equation by b2 and the second equation by b1
+    #that way, we have an (a1* a2 * r2) or (b1 * b2 * r2) term on both equations.
+    #then, we can subtract the two equations to get a result for one variable. Lets stick with teh first option.
+    # so, multiply the first equation by a2....
+    #(a2+a1) * r2 + (a2+b1) * r3 = c1*a2
+    # and multiply the second equation by a1...
+    #(a1+a2) * r2 + (a1 + b2) * r3 = c2*a1
+    # now we subtract the top by the bottom...
+    #(a2+a1-(a1+a2)) * r2 + (a2+b1 - (a1+b2)) * r3= c1*a2 - c2*a1
+    # ^^^^^^^^^^^^^ this term is 0 now, so now we can solve for r3.
+    # r3 = (c1*a2-c2*a1)/((a2+b1-(a1+b2)))
+    r3_num = c1*a2 - c2*a1
+    r3_dem = a2+b1 - (a1+b2)
+    r3 = r3_num/r3_dem
+    # now we can plug in r3 into the equations we saved earlier. here are they for reference again.
+
+    #a1 * r2 + b1 * r3 = c1
+    #a2 * r2 + b2 * r3 = c2
+
+    # some algebra later, we get....
+    # r2 = (c1-(b1*r3))/a1
+    # and
+    # r2 = (c2 - (b2*r3))/a2.
+    # make sure they equal eachother (with all the variables, if not then raise an error)
+    r2_num_1 = c1-(b1*r3)
+    r2_num_2 = c2-(a2*r3)
+
+    r2_value_1 = np.round(r2_num_1/a1, decimals=3)
+    r2_value_2 = np.round(r2_num_2/a2, decimals=3)
+    print(r2_value_1)
+    print(r2_value_2)
+    # since we know r2 and r3 now, we can go back all the way to here:
+    #r1 = 1- r2 -r3
+    if r2_value_1 == r2_value_2:
+        r2 = r2_value_1
+        r1 = 1 - r2 - r3
+    else:
+        print("something went wrong")
+        return "error"
+
+    # and then we should be good?
+    return np.array([r1, r2, r3])
 
 def get_barycentric_coordinates(triangle_coordinates, point_coordinates):
     x1, x2, x3 = triangle_coordinates[0]
