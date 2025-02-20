@@ -26,7 +26,8 @@ def get_barycentric_coordinates(triangle_coordinates, point_coordinates):
     """
     goal:
     - eliminate variables until we have 1 left that we can solve for.
-    - then, plug in the rest until everything is complete"""
+    - then, plug in the rest until everything is complete
+    """
     #get rid of one variable via subsitution (r1 = 1- r2 -r3). Remeber this for when we solve for r1 after we solve for r2 and r3.
     #so now it looks like
     #(1-r2-r3)*x1+r2*x2+r3*x3 == x_goal
@@ -78,8 +79,7 @@ def get_barycentric_coordinates(triangle_coordinates, point_coordinates):
 
     r2_value_1 = np.round(r2_num_1/a1, decimals=3)
     r2_value_2 = np.round(r2_num_2/a2, decimals=3)
-    print(r2_value_1)
-    print(r2_value_2)
+
     # since we know r2 and r3 now, we can go back all the way to here:
     #r1 = 1- r2 -r3
     if r2_value_1 == r2_value_2:
