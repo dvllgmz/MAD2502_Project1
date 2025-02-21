@@ -1,5 +1,11 @@
 import numpy as np
 
+# def left_endpoint(x_vals: np.ndarray, func: np.ufunc):
+#     lefts = x_vals[:-1]
+#     rights = x_vals[1:]
+#     rects = (rights - lefts) * func(lefts)
+#     return sum(rects)
+
 def left_endpoint(x_vals: np.ndarray, func: np.ufunc):
     """
     Calculates the Riemann sum of a function using the left endpoints from all the values in x_vals
@@ -7,12 +13,10 @@ def left_endpoint(x_vals: np.ndarray, func: np.ufunc):
     :param func: The function under which the Riemann sum is computed
     :return: The Riemann sum
     """
-    # The left endpoints
-    lefts = x_vals[:-1]
-    # The right endpoints
-    rights = x_vals[1:]
+    a = x_vals[:-1]
+    b = x_vals[1:]
     # Multiplies the base (right endpoint minus left endpoint) by the height (the function value at the left endpoint) for each rectangle
-    rects = (rights - lefts) * func(lefts)
+    rects = (b - a) * func(a)
     # Sums the rectangles
     return sum(rects)
 
@@ -23,16 +27,13 @@ def trapezoid(x_vals: np.ndarray, func: np.ufunc):
     :param func: The function under which the Riemann sum is computed
     :return: The Riemann sum
     """
-    # The left endpoints
-    left_x = x_vals[:-1]
-    # The right endpoints
-    right_x = x_vals[1:]
-    # The function at the left endpoints
-    left_y = func(left_x)
-    # The function at the right endpoints
-    right_y = func(right_x)
+    a = x_vals[:-1]
+    b = x_vals[1:]
+    # The function at the left/right endpoints
+    left_y = func(a)
+    right_y = func(b)
     # Multiplies the base (right endpoint minus left endpoint) by the mean of the left height and the right height for each trapezoid
-    traps = (right_x - left_x) * ((left_y + right_y) / 2)
+    traps = (b - a) * ((left_y + right_y) / 2)
     # Sums the trapezoids
     return sum(traps)
 
@@ -43,5 +44,7 @@ def simpson(x_vals: np.ndarray, func: np.ufunc):
     :param func: The function for which we are estimating the integral
     :return: The estimated integral
     """
-    # Plug all values into Simpson's rule, x_vals[0] is a and x_vals[-1] is b
-    return ((x_vals[-1] - x_vals[0]) / 6.0) * (func(x_vals[0]) + 4 * func((x_vals[0] + x_vals[-1]) / 2.0) + func(x_vals[-1]))
+    a = x_vals[0]
+    b = x_vals[-1]
+    val = ((b-a)/6) * (func(a) + (4*func((a+b)/2)) + func(b))
+    return val
