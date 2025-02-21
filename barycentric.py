@@ -1,6 +1,95 @@
 import numpy as np
 
 
+
+
+def get_barycentric_coordinates(triangle_coordinates, point_coordinates):
+    x1, x2, x3 = triangle_coordinates[0]
+    y1, y2, y3 = triangle_coordinates[1]
+    x, y = point_coordinates
+    ''' I solved for lambda using the determinant/matrix idea you can get from the equations but I'm not sure if this is the right way
+        [x1, x2, x3]  [lambda1]    =   x
+        [y1, y2, y3]  [lambda2]    =   y
+        [1,  1,   1]  [lambda3]    =   1
+
+        det = x1(y2 - y3) + x2(y1 - y3) + x3(y1 - y2)
+
+    '''
+    det = x1 * (y2 - y3) + x2 * (y1 - y3) + x3 * (y1 - y2)
+
+    lambda_1 = ((x - x2) * (y3 - y2) - (y - y2) * (x3 - x2)) / det
+    lambda_2 = ((x - x3) * (y1 - y3) - (y - y3) * (x1 - x3)) / det
+    lambda_3 = 1 - lambda_1 - lambda_2
+
+    return np.array([lambda_1, lambda_2, lambda_3])
+
+
+
+
+
+
+
+def get_cartesian_coordinates(triangle_coordinates, barycentric_coordinates):
+    """
+    Okay, so now we have:
+    r1 * x1 + r2 * x2 + r3 * x3 = x_goal
+    r1 * y1 + r2 * y2 + r3 * y3 = y_goal
+    r1 + r2 + r3 = 1, but we know r1,r2,r3 (barycentric_coordinates) and everything that isn't x_goal and y_goal. (triangle coordinates)
+    :param triangle_coordinates:
+    :param barycentric_coordinates:
+    :return:
+    """
+    # this is just multiplication? Lets set up our variables first
+    x1 = triangle_coordinates[0,0]
+    y1 = triangle_coordinates[1,0]
+    x2 = triangle_coordinates[0,1]
+    y2 = triangle_coordinates[1,1]
+    x3 = triangle_coordinates[0,2]
+    y3 = triangle_coordinates[1,2]
+    r1 = barycentric_coordinates[0]
+    r2 = barycentric_coordinates[1]
+    r3 = barycentric_coordinates[2]
+    # first, lets make sure r1, r2, r3 are valid.
+    if ((r1 + r2 + r3)) != 1:
+        return "invalid barycentric coordinates"
+    # compute like equations above
+    x_goal = r1 * x1 + r2 * x2 + r3 * x3
+    y_goal = r1 * y1 + r2 * y2 + r3 * y3
+    possible_result = np.array([x_goal, y_goal])
+    # another check to make sure we're not failing is to put it into the get_barycentric_coordinates, since they're sort of inverses of eachother.
+    checker = get_barycentric_coordinates(triangle_coordinates, possible_result)
+
+    if (checker[0], checker[1], checker[2]) != (r1,r2,r3):
+        return "something went wrong, cartesian"
+    return possible_result
+
+
+
+
+
+
+
+def is_inside_triangle(triangle_coordinates, point_coordinates):
+    """* The function `is_inside_triangle` takes the same input arguments as `get_barycentric_coordinates` but it returns a `bool` as to whether the point lies inside of the triangle or not.
+The relevant property of barycentric coordinates is that a point is inside of the the triangle if all coordinates are non-negative.
+    So we just check if any of the provided array is less than 1, i think? Unless theres a misunderstanding. If anything, get the 3-figure array, check if they're negative. if they are, return false. if not, return true.
+
+    if ((barycentric_coordinates[0] < 0) or (barycentric_coordinates[1] < 0) or  (barycentric_coordinates[2] < 0)):
+        return False
+    return True
+    """
+
+    barycentric_coord = get_barycentric_coordinates(triangle_coordinates, point_coordinates)
+
+    return np.all(barycentric_coord >= 0)
+
+
+
+
+
+
+
+
 '''def get_barycentric_coordinates(triangle_coordinates, point_coordinates):
 
     #setting up triangle and "goal" coordinates.
@@ -87,77 +176,3 @@ import numpy as np
     return np.array([r1, r2, r3])
 
 '''
-
-def get_cartesian_coordinates(triangle_coordinates, barycentric_coordinates):
-    """
-    Okay, so now we have:
-    r1 * x1 + r2 * x2 + r3 * x3 = x_goal
-    r1 * y1 + r2 * y2 + r3 * y3 = y_goal
-    r1 + r2 + r3 = 1, but we know r1,r2,r3 (barycentric_coordinates) and everything that isn't x_goal and y_goal. (triangle coordinates)
-    :param triangle_coordinates:
-    :param barycentric_coordinates:
-    :return:
-    """
-    # this is just multiplication? Lets set up our variables first
-    x1 = triangle_coordinates[0,0]
-    y1 = triangle_coordinates[1,0]
-    x2 = triangle_coordinates[0,1]
-    y2 = triangle_coordinates[1,1]
-    x3 = triangle_coordinates[0,2]
-    y3 = triangle_coordinates[1,2]
-    r1 = barycentric_coordinates[0]
-    r2 = barycentric_coordinates[1]
-    r3 = barycentric_coordinates[2]
-    # first, lets make sure r1, r2, r3 are valid.
-    if ((r1 + r2 + r3)) != 1:
-        return "invalid barycentric coordinates"
-    # compute like equations above
-    x_goal = r1 * x1 + r2 * x2 + r3 * x3
-    y_goal = r1 * y1 + r2 * y2 + r3 * y3
-    possible_result = np.array([x_goal, y_goal])
-    # another check to make sure we're not failing is to put it into the get_barycentric_coordinates, since they're sort of inverses of eachother.
-    checker = get_barycentric_coordinates(triangle_coordinates, possible_result)
-
-    if (checker[0], checker[1], checker[2]) != (r1,r2,r3):
-        return "something went wrong, cartesian"
-    return possible_result
-
-def is_inside_triangle(triangle_coordinates, barycentric_coordinates):
-    """* The function `is_inside_triangle` takes the same input arguments as `get_barycentric_coordinates` but it returns a `bool` as to whether the point lies inside of the triangle or not.
-The relevant property of barycentric coordinates is that a point is inside of the the triangle if all coordinates are non-negative.
-    So we just check if any of the provided array is less than 1, i think? Unless theres a misunderstanding. If anything, get the 3-figure array, check if they're negative. if they are, return false. if not, return true.
-
-    if ((barycentric_coordinates[0] < 0) or (barycentric_coordinates[1] < 0) or  (barycentric_coordinates[2] < 0)):
-        return False
-    return True
-    """
-
-    barycentric_coord = get_barycentric_coordinates(triangle_coordinates, barycentric_coordinates)
-
-    return np.all(barycentric_coord >= 0)
-
-
-
-
-
-
-
-def get_barycentric_coordinates(triangle_coordinates, point_coordinates):
-    x1, x2, x3 = triangle_coordinates[0]
-    y1, y2, y3 = triangle_coordinates[1]
-    x, y = point_coordinates
-    ''' I solved for lambda using the determinant/matrix idea you can get from the equations but I'm not sure if this is the right way
-        [x1, x2, x3]  [lambda1]    =   x
-        [y1, y2, y3]  [lambda2]    =   y
-        [1,  1,   1]  [lambda3]    =   1
-        
-        det = x1(y2 - y3) + x2(y1 - y3) + x3(y1 - y2)
-    
-    '''
-    det = x1*(y2 - y3) + x2*(y1 - y3) + x3*(y1 - y2)
-
-    lambda_1 = ((x - x2)*(y3 - y2) - (y - y2)*(x3 - x2)) / det
-    lambda_2 = ((x - x3)*(y1 - y3) - (y - y3)*(x1 - x3)) / det
-    lambda_3 = 1 - lambda_1 - lambda_2
-
-    return np.array([lambda_1, lambda_2, lambda_3])
