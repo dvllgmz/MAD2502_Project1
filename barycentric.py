@@ -11,14 +11,6 @@ def get_barycentric_coordinates(triangle_coordinates, point_coordinates):
     x1, x2, x3 = triangle_coordinates[0]
     y1, y2, y3 = triangle_coordinates[1]
     x_goal, y_goal = point_coordinates
-    '''x1 = triangle_coordinates[0,0]
-    y1 = triangle_coordinates[1,0]
-    x2 = triangle_coordinates[0,1]
-    y2 = triangle_coordinates[1,1]
-    x3 = triangle_coordinates[0,2]
-    y3 = triangle_coordinates[1,2]
-    x_goal = point_coordinates[0]
-    y_goal = point_coordinates[1]'''
 
     #our equations begin looking like this
     #r1*x1+r2*x2+r3*x3 == x_goal
@@ -99,6 +91,7 @@ def get_barycentric_coordinates(triangle_coordinates, point_coordinates):
 
 
 
+
 def get_cartesian_coordinates(triangle_coordinates, barycentric_coordinates):
     """
     Okay, so now we have:
@@ -110,15 +103,10 @@ def get_cartesian_coordinates(triangle_coordinates, barycentric_coordinates):
     :return:
     """
     # this is just multiplication? Lets set up our variables first
-    x1 = triangle_coordinates[0,0]
-    y1 = triangle_coordinates[1,0]
-    x2 = triangle_coordinates[0,1]
-    y2 = triangle_coordinates[1,1]
-    x3 = triangle_coordinates[0,2]
-    y3 = triangle_coordinates[1,2]
-    r1 = barycentric_coordinates[0]
-    r2 = barycentric_coordinates[1]
-    r3 = barycentric_coordinates[2]
+    x1, x2, x3 = triangle_coordinates[0]
+    y1, y2, y3 = triangle_coordinates[1]
+    r1, r2, r3 = barycentric_coordinates[0]
+
     # first, lets make sure r1, r2, r3 are valid.
     if ((r1 + r2 + r3)) != 1:
         return "invalid barycentric coordinates"
