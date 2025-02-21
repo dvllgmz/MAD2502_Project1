@@ -8,14 +8,17 @@ To do:
 def get_barycentric_coordinates(triangle_coordinates, point_coordinates):
 
     #setting up triangle and "goal" coordinates.
-    x1 = triangle_coordinates[0,0]
+    x1, x2, x3 = triangle_coordinates[0]
+    y1, y2, y3 = triangle_coordinates[1]
+    x_goal, y_goal = point_coordinates
+    '''x1 = triangle_coordinates[0,0]
     y1 = triangle_coordinates[1,0]
     x2 = triangle_coordinates[0,1]
     y2 = triangle_coordinates[1,1]
     x3 = triangle_coordinates[0,2]
     y3 = triangle_coordinates[1,2]
     x_goal = point_coordinates[0]
-    y_goal = point_coordinates[1]
+    y_goal = point_coordinates[1]'''
 
     #our equations begin looking like this
     #r1*x1+r2*x2+r3*x3 == x_goal
@@ -125,6 +128,7 @@ def get_cartesian_coordinates(triangle_coordinates, barycentric_coordinates):
     possible_result = np.array([x_goal, y_goal])
     # another check to make sure we're not failing is to put it into the get_barycentric_coordinates, since they're sort of inverses of eachother.
     checker = get_barycentric_coordinates(triangle_coordinates, possible_result)
+    checker = np.round(checker, decimals=3)
 
     if (checker[0], checker[1], checker[2]) != (r1,r2,r3):
         return "something went wrong, cartesian"
