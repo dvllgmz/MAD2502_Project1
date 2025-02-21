@@ -1,12 +1,12 @@
 import numpy as np
 
-
+'''
+To do:
+    Make functions get_barycentric_coordinates and cartesian_coordinates cleaner
+'''
 
 def get_barycentric_coordinates(triangle_coordinates, point_coordinates):
-    '''
-    To do:
-        Make functions get_barycentric_coordinates and cartesian_coordinates cleaner
-    '''
+
     #setting up triangle and "goal" coordinates.
     x1 = triangle_coordinates[0,0]
     y1 = triangle_coordinates[1,0]
@@ -135,17 +135,11 @@ def get_cartesian_coordinates(triangle_coordinates, barycentric_coordinates):
 
 
 
-def is_inside_triangle(triangle_coordinates, point_coordinates):
-    """* The function `is_inside_triangle` takes the same input arguments as `get_barycentric_coordinates` but it returns a `bool` as to whether the point lies inside of the triangle or not.
-The relevant property of barycentric coordinates is that a point is inside of the the triangle if all coordinates are non-negative.
-    So we just check if any of the provided array is less than 1, i think? Unless theres a misunderstanding. If anything, get the 3-figure array, check if they're negative. if they are, return false. if not, return true.
 
-    if ((barycentric_coordinates[0] < 0) or (barycentric_coordinates[1] < 0) or  (barycentric_coordinates[2] < 0)):
-        return False
-    return True
-    """
+
+
+def is_inside_triangle(triangle_coordinates, point_coordinates):
 
     barycentric_coord = get_barycentric_coordinates(triangle_coordinates, point_coordinates)
 
     return np.all(barycentric_coord >= 0)
-
