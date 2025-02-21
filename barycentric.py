@@ -135,7 +135,6 @@ def get_cartesian_coordinates(triangle_coordinates, barycentric_coordinates):
 
 
 
-
 def is_inside_triangle(triangle_coordinates, point_coordinates):
     """* The function `is_inside_triangle` takes the same input arguments as `get_barycentric_coordinates` but it returns a `bool` as to whether the point lies inside of the triangle or not.
 The relevant property of barycentric coordinates is that a point is inside of the the triangle if all coordinates are non-negative.
