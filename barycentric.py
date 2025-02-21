@@ -1,100 +1,65 @@
 import numpy as np
 
-'''
-To do:
-    Make functions get_barycentric_coordinates and cartesian_coordinates cleaner
-'''
-
-def get_barycentric_coordinates(triangle_coordinates, point_coordinates):
-
-    #setting up triangle and "goal" coordinates.
+def get_barycentric_coordinates(triangle_coordinates:np.ndarray, point_coordinates: np.ndarray):
     x1, x2, x3 = triangle_coordinates[0]
     y1, y2, y3 = triangle_coordinates[1]
-    x_goal, y_goal = point_coordinates
+    point_x, point_y = point_coordinates
 
-    #our equations begin looking like this
-    #r1*x1+r2*x2+r3*x3 == x_goal
-    #r1*y1+r2*y2+r3*y3 == y_goal
-    #r1+r2+r3 = 1
-    """
-    goal:
-    - eliminate variables until we have 1 left that we can solve for.
-    - then, plug in the rest until everything is complete"""
-    #get rid of one variable via subsitution (r1 = 1- r2 -r3). Remeber this for when we solve for r1 after we solve for r2 and r3.
-    #so now it looks like
-    #(1-r2-r3)*x1+r2*x2+r3*x3 == x_goal
-    #(1-r2-r3)*y1+r2*y2+r3*y3 == y_goal
-    #distribute
-    #x1 -  r2*x1 - r3*x1 + r2*x2 +r3*x3 == x_goal
-    #y1 - r2*y1 - r3*y1 + r2*y2 +  r3*y3 == y_goal
-    #group for readability
-    #(x2-x1)*r2+(x3-x1)*r3 == x_goal - x1
-    #(y2 - y1) * r2 + (y3 - y1) * r3 == y_goal - y1
-    #for better readability, lets have x2-x1 be a1, x3-x1 be b1, and x_goal - x1 be c1.
-    #same with the y variables, with a2,b2, and c2. (save these equations after we solve for this first variable)
-    a1 = x2 - x1
-    b1 = x3 - x1
-    c1 = x_goal - x1
-    a2 = y2 - y1
-    b2 = y3 - y1
-    c2 = y_goal - y1
-    #a1 * r2 + b1 * r3 = c1
-    #a2 * r2 + b2 * r3 = c2
-    #we can eliminate a second unknown by either:
-    #multiplying the first equation by a2 and the second equation by a1
-    #or multiplying the first equation by b2 and the second equation by b1
-    #that way, we have an (a1* a2 * r2) or (b1 * b2 * r2) term on both equations.
-    #then, we can subtract the two equations to get a result for one variable. Lets stick with teh first option.
-    # so, multiply the first equation by a2....
-    #(a2+a1) * r2 + (a2+b1) * r3 = c1*a2
-    # and multiply the second equation by a1...
-    #(a1+a2) * r2 + (a1 + b2) * r3 = c2*a1
-    # now we subtract the top by the bottom...
-    #(a2+a1-(a1+a2)) * r2 + (a2*b1 - (a1*b2)) * r3= c1*a2 - c2*a1
-    # ^^^^^^^^^^^^^ this term is 0 now, so now we can solve for r3.
-    # r3 = (c1*a2-c2*a1)/((a2+b1-(a1+b2)))
-    #
-    r3_num = c1*a2 - c2*a1
-    r3_dem = a2*b1 - (a1*b2)
-    r3 = r3_num/r3_dem
-    # now we can plug in r3 into the equations we saved earlier. here are they for reference again.
+    '''
+    Known equations:
+    Eq. 1: x1lambda1 + x2lambda2 + x3lambda3 = x
+    Eq. 2: y1lambda1 + y2lambda2 + y3lambda3 = y
+    Eq. 3: lambda1 + lambda2 + lambda3 = 1
+    
+    Eq. 3 becomes: lambda1 = 1 - lambda2 - lambda3
+    
+    Substitute into Eqs. 1,2:
+    (1-lam2-lam3)x1 + x2lam2 + x3lam3 = x
+    (1-lam2-lam3)y1 + y2lam2 + y3lam3 = y
+    
+    Distribute and Group:
+    (x2-x1)lam2 + (x3-x1)lam3 = x - x1
+    (y2-y1)lam2 + (y3-y1)lam3 = y - y1
+    
+    Use variables A, B, C to write system of equations in standard form:
+    Axlam2 + Bxlam3 = Cx
+    Aylam2 + Bylam3 = Cy
+    
+    Eliminate 'lam2' variable by scaling both equations by appropriate constants and then adding both equations:
+    Multiplied by Ay => AxAylam2 + AyBxlam3 = AyCx
+    Multiplied by -Ax => -AxAylam2 - AxBxlam3 = -AxCy
+    Added => AyBxlam3 - AxBxlam3 = AyCx - AxCy
+    
+    Simplify, solve for lam3:
+    lam3(AyBx - AxBx) = AyCx - AxCy
+    lam3 = (AyCx - AxCy) / (AyBx - AxBy)
+    
+    Follow similar steps to solve for lam1, lam2:
+    lam2 = (ByCx - BxCy) / (AxBy - AyBx)
+    lam1 = 1 - ((ByCx - BxCy) / (AxBy - AyBx)) - ((AyCx - AxCy) / (AyBx - AxBx))
+    '''
+    # Variables representing coefficients of x, y equations when written in standard form (Ax + By = C)
+    # x variable equations
+    Ax = x2 - x1
+    Bx = x3 - x1
+    Cx = point_x - x1
+    # y variable equations
+    Ay = y2 - y1
+    By = y3 - y1
+    Cy = point_y - y1
 
-    #a1 * r2 + b1 * r3 = c1
-    #a2 * r2 + b2 * r3 = c2
+    # Solving for lam3, lam2 according to reduced equation explained above
+    lam3 = (Ay*Cx - Ax*Cy) / (Ay*Bx - Ax*By)
+    lam2 = (By*Cx - Bx*Cy) / (Ax*By - Ay*Bx)
+    # Solving for lam1 according to Eq. 'lam1 = 1 - lam2 - lam3'
+    lam1 = 1 - lam2 - lam3
 
-    # some algebra later, we get....
-    # r2 = (c1-(b1*r3))/a1
-    # and
-    # r2 = (c2 - (b2*r3))/a2.
-    # make sure they equal eachother (with all the variables, if not then raise an error)
-    r2_num_1 = c1-(b1*r3)
-    r2_num_2 = c2-(b2*r3)
-
-    r2_value_1 = np.round(r2_num_1/a1, decimals=3)
-    r2_value_2 = np.round(r2_num_2/a2, decimals=3)
-    #we use np.round() because floating point stuff is funny. you know with the 2.00000001 and all of that. theres probably a better way to do this?
-    # since we know r2 and r3 now, we can go back all the way to here:
-    #r1 = 1- r2 -r3
-    if r2_value_1 == r2_value_2:
-        r2 = r2_value_1
-        r1 = 1 - r2 - r3
-    else:
-        print("something went wrong")
-        return "error"
-
-    # and then we should be good?
-    return np.array([r1, r2, r3])
-
-
-
-
-
-
-
+    bary_coords = np.array([lam1, lam2, lam3])
+    return bary_coords
 
 def get_cartesian_coordinates(triangle_coordinates, barycentric_coordinates):
     """
-    Okay, so now we have:
+    Known equations:
     r1 * x1 + r2 * x2 + r3 * x3 = x_goal
     r1 * y1 + r2 * y2 + r3 * y3 = y_goal
     r1 + r2 + r3 = 1, but we know r1,r2,r3 (barycentric_coordinates) and everything that isn't x_goal and y_goal. (triangle coordinates)
@@ -102,36 +67,28 @@ def get_cartesian_coordinates(triangle_coordinates, barycentric_coordinates):
     :param barycentric_coordinates:
     :return:
     """
-    # this is just multiplication? Lets set up our variables first
+    # Initialize variables according to parameters
     x1, x2, x3 = triangle_coordinates[0]
     y1, y2, y3 = triangle_coordinates[1]
     r1, r2, r3 = barycentric_coordinates[0]
 
-    # first, lets make sure r1, r2, r3 are valid.
+    # Check r1, r2, r3 validity.
     if ((r1 + r2 + r3)) != 1:
-        return "invalid barycentric coordinates"
-    # compute like equations above
+        return "Invalid barycentric coordinates."
+
+    # Compute using equations above
     x_goal = r1 * x1 + r2 * x2 + r3 * x3
     y_goal = r1 * y1 + r2 * y2 + r3 * y3
-    possible_result = np.array([x_goal, y_goal])
-    # another check to make sure we're not failing is to put it into the get_barycentric_coordinates, since they're sort of inverses of eachother.
-    checker = get_barycentric_coordinates(triangle_coordinates, possible_result)
-    checker = np.round(checker, decimals=3)
+    result = np.array([x_goal, y_goal])
 
-    if (checker[0], checker[1], checker[2]) != (r1,r2,r3):
-        return "something went wrong, cartesian"
-    return possible_result
+    # Call get_barycentric_coordinates() using calculated result to verify
+    verify = get_barycentric_coordinates(triangle_coordinates, result)
+    verify = np.round(verify, 3)
 
-
-
-
-
-
-
-
+    if (verify[0], verify[1], verify[2]) != (r1,r2,r3):
+        return "Something went wrong, cartesian"
+    return result
 
 def is_inside_triangle(triangle_coordinates, point_coordinates):
-
-    barycentric_coord = get_barycentric_coordinates(triangle_coordinates, point_coordinates)
-
-    return np.all(barycentric_coord >= 0)
+    bary_coord = get_barycentric_coordinates(triangle_coordinates, point_coordinates)
+    return np.all(bary_coord >= 0)
